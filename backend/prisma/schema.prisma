@@ -1,0 +1,61 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model ControlPanel {
+  id                    Int                  @id @default(autoincrement())
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
+  name                  String
+  login_url             String
+  ip                    String?
+  port                  Int?
+  login                 String?
+  password              String?
+  apiKey                String?
+  DigitalOceanAccount   DigitalOceanAccount? @relation(fields: [DigitalOceanAccountId], references: [id])
+  DigitalOceanAccountId Int?
+  Domains               Domain[]
+}
+
+model Domain {
+  id                    Int                  @id @default(autoincrement())
+  name                  String
+  ttl                   Int?
+  zone_file             String?
+  DomainRecords         DomainRecord[]
+  DigitalOceanAccount   DigitalOceanAccount? @relation(fields: [DigitalOceanAccountId], references: [id])
+  DigitalOceanAccountId Int?
+  ControlPanel          ControlPanel?        @relation(fields: [ControlPanelId], references: [id])
+  ControlPanelId        Int?
+}
+
+model DomainRecord {
+  id       Int     @id @default(autoincrement())
+  type     String
+  name     String
+  data     String
+  ttl      Int?
+  Domain   Domain? @relation(fields: [DomainId], references: [id])
+  DomainId Int?
+}
+
+model DigitalOceanAccount {
+  id            Int            @id @default(autoincrement())
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  name          String         @unique
+  status        Boolean        @default(true)
+  accessToken   String         @unique
+  ControlPanels ControlPanel[]
+  Domains       Domain[]
+}
+
