@@ -19,9 +19,11 @@
             <td>
               <strong>{{ account.name }}</strong>
             </td>
-            <td>{{ account.control_panel }}</td>
+            <td>{{ account.control_panel ? account.control_panel : 'Not set' }}</td>
             <td>
-              <span class="badge bg-label-primary me-1" v-if="account.status">Active</span>
+              <span class="badge bg-label-primary me-1" v-if="account.status"
+                >Active</span
+              >
               <span class="badge bg-label-danger me-1" v-else>Disabled</span>
             </td>
             <td>
@@ -36,9 +38,11 @@
                 </button>
                 <div class="dropdown-menu" style="">
                   <a class="dropdown-item" href="javascript:void(0);"
-                    ><i class="bx bx-edit-alt me-1"></i> Edit</a>
+                    ><i class="bx bx-edit-alt me-1"></i> Edit</a
+                  >
                   <a class="dropdown-item" href="javascript:void(0);"
-                    ><i class="bx bx-trash me-1"></i> Disable</a>
+                    ><i class="bx bx-trash me-1"></i> Disable</a
+                  >
                 </div>
               </div>
             </td>
@@ -47,18 +51,40 @@
       </table>
     </div>
   </div>
-
 </template>
 
 <script>
-import data from '@/data/digital_ocean.json'
+import axios from 'axios'
 
 export default {
   name: 'DigitalOceanView',
   data () {
     return {
-      accounts: data
+      accounts: []
     }
+  },
+  methods: {
+    async getAccounts () {
+      const config = {
+        method: 'get',
+        url: 'http://localhost:5000/api/v1/do_accounts',
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Content-Type': 'application/json'
+        }
+      }
+      try {
+        const response = await axios(config)
+        this.accounts = response.data.data
+        console.log(response.data)
+        console.log(this.accounts)
+      } catch (error) {
+        console.log(error)
+      }
+    }
+  },
+  mounted: function () {
+    this.getAccounts()
   }
 }
 </script>
