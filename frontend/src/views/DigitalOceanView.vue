@@ -8,9 +8,10 @@
         <thead>
           <tr>
             <th>Account name</th>
-
+            <th>Domains</th>
             <th>Control Panel</th>
             <th>Status</th>
+            <th>Manage</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -19,12 +20,25 @@
             <td>
               <strong>{{ account.name }}</strong>
             </td>
-            <td>{{ account.control_panel ? account.control_panel : 'Not set' }}</td>
+            <td>{{ account.domainsCount ? account.domainsCount : "None" }}</td>
+            <td>
+              {{ account.controlPanel ? account.controlPanel : "Not set" }}
+            </td>
             <td>
               <span class="badge bg-label-primary me-1" v-if="account.status"
                 >Active</span
               >
               <span class="badge bg-label-danger me-1" v-else>Disabled</span>
+            </td>
+            <td>
+              <router-link
+                :to="{
+                  name: 'digital_ocean_manage',
+                  params: { id: account.id },
+                }"
+              >
+                <i class="text-success fa-solid fa-play"></i>
+              </router-link>
             </td>
             <td>
               <div class="dropdown">
@@ -50,17 +64,58 @@
         </tbody>
       </table>
     </div>
+    <div class="m-3">
+      <button
+        type="button"
+        class="btn btn-primary"
+        data-bs-toggle="modal"
+        data-bs-target="#modalCenter"
+      >
+        Add Account
+      </button>
+    </div>
   </div>
+
+  <ModalCenter
+    title="Add Account"
+    action="Add"
+    :fields="fields"
+    :createAccount="createAccount"
+    v-model="fields"
+  />
 </template>
 
 <script>
 import axios from 'axios'
+import ModalCenter from '@/components/Modals/ModalCenter.vue'
 
 export default {
   name: 'DigitalOceanView',
   data () {
     return {
-      accounts: []
+      accounts: [],
+      nameValue: '',
+      accessTokenValue: '',
+      fields: [
+        {
+          id: 'accountName',
+          name: 'name',
+          placeholder: 'Enter Account Name',
+          text: 'Account Name',
+          type: 'text',
+          required: true,
+          bind: this.nameValue
+        },
+        {
+          id: 'accessToken',
+          name: 'accessToken',
+          placeholder: 'Enter Access Token',
+          text: 'Access Token',
+          type: 'text',
+          required: true,
+          bind: this.accessTokenValue
+        }
+      ]
     }
   },
   methods: {
@@ -81,10 +136,24 @@ export default {
       } catch (error) {
         console.log(error)
       }
+    },
+    async createAccount () {
+      const data = {}
+
+      this.fields.forEach((element, index) => {
+        data[element.name] = element.bind
+        console.log({ element, index })
+      })
+
+      console.log({ data })
+      console.log('Account created')
     }
   },
   mounted: function () {
     this.getAccounts()
+  },
+  components: {
+    ModalCenter
   }
 }
 </script>
@@ -92,5 +161,9 @@ export default {
 <style scoped>
 .table-responsive.text-nowrap {
   overflow: visible;
+}
+
+tr {
+  text-align: center;
 }
 </style>

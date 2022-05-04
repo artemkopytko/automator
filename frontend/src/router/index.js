@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '@/views/HomeView.vue'
 import DigitalOceanView from '@/views/DigitalOceanView.vue'
+import DigitalOceanManageView from '@/views/DigitalOceanManageView.vue'
 import DomainsMonitorView from '@/views/DomainsMonitorView.vue'
 import HestiaView from '@/views/HestiaView.vue'
 import IframeCheckerView from '@/views/IframeCheckerView.vue'
@@ -16,6 +17,11 @@ const routes = [
     path: '/digital_ocean',
     name: 'digital_ocean',
     component: DigitalOceanView
+  },
+  {
+    path: '/digital_ocean/:id',
+    name: 'digital_ocean_manage',
+    component: DigitalOceanManageView
   },
   {
     path: '/domains_monitor',
