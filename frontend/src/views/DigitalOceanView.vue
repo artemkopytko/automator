@@ -1,4 +1,12 @@
 <template>
+  <Toast
+    v-if="toastIsVisible"
+    :toastClass="toastClass"
+    :title="toastTitle"
+    :time="toastTime"
+    :text="toastText"
+  />
+
   <h4 class="fw-bold py-3 mb-4">Digital Ocean</h4>
 
   <div class="card">
@@ -88,6 +96,7 @@
 <script>
 import axios from 'axios'
 import ModalCenter from '@/components/Modals/ModalCenter.vue'
+import Toast from '@/components/Utils/ToastComponent.vue'
 
 export default {
   name: 'DigitalOceanView',
@@ -96,6 +105,11 @@ export default {
       accounts: [],
       nameValue: '',
       accessTokenValue: '',
+      toastIsVisible: false,
+      toastClass: '', // bg-primary bg-secondary bg-success bg-danger bg-warning
+      toastTitle: '',
+      toastTime: '',
+      toastText: '',
       fields: [
         {
           id: 'accountName',
@@ -119,6 +133,17 @@ export default {
     }
   },
   methods: {
+    showToast (type, title, time, text) {
+      this.toastClass = type ? 'bg-' + type : ''
+      this.toastTitle = title
+      this.toastTime = time
+      this.toastText = text
+      this.toastIsVisible = true
+
+      setTimeout(() => {
+        this.toastIsVisible = false
+      }, 3000)
+    },
     async getAccounts () {
       const config = {
         method: 'get',
@@ -131,21 +156,47 @@ export default {
       try {
         const response = await axios(config)
         this.accounts = response.data.data
-        console.log(response.data)
-        console.log(this.accounts)
+
+        // console.log(response.data)
+        // console.log(this.accounts)
       } catch (error) {
         console.log(error)
       }
     },
     async createAccount () {
-      const data = {}
+      const formData = {}
 
       this.fields.forEach((element, index) => {
-        data[element.name] = element.bind
+        formData[element.name] = element.bind
         console.log({ element, index })
       })
 
-      console.log({ data })
+      console.log({ formData })
+      const data = JSON.stringify(formData)
+      console.log(data)
+
+      const config = {
+        method: 'post',
+        url: 'http://localhost:5000/api/v1/do_accounts',
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Content-Type': 'application/json'
+        },
+        data: data
+      }
+      try {
+        // const response =
+        await axios(config)
+        // this.accounts = response.data.data
+        // console.log(response.data)
+        this.showToast('primary', 'Success', 'now', 'Account added')
+
+        this.getAccounts()
+        // console.log(this.accounts)
+      } catch (error) {
+        console.log(error)
+      }
+
       console.log('Account created')
     }
   },
@@ -153,7 +204,8 @@ export default {
     this.getAccounts()
   },
   components: {
-    ModalCenter
+    ModalCenter,
+    Toast
   }
 }
 </script>
