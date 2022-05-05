@@ -201,6 +201,23 @@ export default {
         console.log(error)
         this.showToast('danger', 'Error', 'now', 'An error occured. Try again.')
       }
+    },
+    async getAccountDomains () {
+      const config = {
+        method: 'get',
+        url: 'http://localhost:5000/api/v1/do_accounts/' + this.accountId,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Content-Type': 'application/json'
+        }
+      }
+      try {
+        const response = await axios(config)
+        this.account = response.data.data
+      } catch (error) {
+        console.log(error)
+        this.showToast('danger', 'Error', 'now', 'An error occured. Try again.')
+      }
     }
   },
   mounted: function () {

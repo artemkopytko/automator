@@ -5,7 +5,8 @@ const {
   getDoAccount,
   createDoAccount,
   editDoAccount,
-  deleteDoAccount
+  deleteDoAccount,
+  getDoAccountDomains
 } = require('../controllers/DigitalOceanController')
 
 apiRoutes.route('/do_accounts')
@@ -16,5 +17,8 @@ apiRoutes.route('/do_accounts/:id')
   .get(getDoAccount)
   .put(editDoAccount)
   .delete(deleteDoAccount)
+
+apiRoutes.route('/do_accounts/:id/domains')
+  .get(getDoAccountDomains)
 
 module.exports = apiRoutes

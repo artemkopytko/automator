@@ -78,22 +78,38 @@ const deleteDoAccount = async (req, res) => {
 }
 
 const getDoAccountDomains = async (req, res) => {
-  const config = {
-    method: 'get',
-    url: 'https://api.digitalocean.com/v2/domains?page=1&per_page=200',
-    headers: {
-      Accept: 'application/json',
-      Authorization: 'Bearer dop_v1_3c54df997905d01377ae8737e6b8c647caf2f513e0ffdc465a93579cf9d9c71a'
-    }
-  }
+  const id = Number(req.params.id)
+  // console.log(id)
+  if (id) {
+    try {
+      const account = await DigitalOceanAccount.findFirst({
+        where: {
+          id
+        }
+      })
 
-  axios(config)
-    .then(function (response) {
-      console.log(JSON.stringify(response.data))
-    })
-    .catch(function (error) {
-      console.log(error)
-    })
+      const config = {
+        method: 'get',
+        url: 'https://api.digitalocean.com/v2/domains?page=1&per_page=200',
+        headers: {
+          Accept: 'application/json',
+          Authorization: 'Bearer ' + account.accessToken
+        }
+      }
+
+      try {
+        const response = await axios(config)
+
+        res.status(200).json({ success: true, data: response.data })
+      } catch (error) {
+        res.status(400).json({ success: false, msg: 'Error. Can not get account domains' })
+      }
+    } catch (error) {
+      res.status(400).json({ success: false, msg: 'Error. Can not get account details' })
+    }
+  } else {
+    res.status(400).json({ success: false, msg: 'Error. Account id is invalid number' })
+  }
 }
 
 module.exports = {
