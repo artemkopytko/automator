@@ -59,11 +59,14 @@
                   <i class="fa-solid fa-ellipsis-vertical"></i>
                 </button>
                 <div class="dropdown-menu" style="">
-                  <a class="dropdown-item" href="javascript:void(0);"
-                    ><i class="bx bx-edit-alt me-1"></i> Edit</a
+                  <a class="dropdown-item" disabled href="javascript:void(0);" style="pointer-events: none; cursor: default;"
+                    ><i class="bx bx-edit-alt me-1"></i> Edit (in dev)</a
                   >
-                  <a class="dropdown-item" href="javascript:void(0);"
-                    ><i class="bx bx-trash me-1"></i> Disable</a
+                  <a
+                    class="dropdown-item"
+                    href="javascript:void(0);"
+                    @click="deleteAccount(account.id)"
+                    ><i class="bx bx-trash me-1"></i> Delete</a
                   >
                 </div>
               </div>
@@ -103,8 +106,6 @@ export default {
   data () {
     return {
       accounts: [],
-      nameValue: '',
-      accessTokenValue: '',
       toastIsVisible: false,
       toastClass: '', // bg-primary bg-secondary bg-success bg-danger bg-warning
       toastTitle: '',
@@ -118,7 +119,7 @@ export default {
           text: 'Account Name',
           type: 'text',
           required: true,
-          bind: this.nameValue
+          bind: ''
         },
         {
           id: 'accessToken',
@@ -127,7 +128,7 @@ export default {
           text: 'Access Token',
           type: 'text',
           required: true,
-          bind: this.accessTokenValue
+          bind: ''
         }
       ]
     }
@@ -161,6 +162,12 @@ export default {
         // console.log(this.accounts)
       } catch (error) {
         console.log(error)
+        this.showToast(
+          'danger',
+          'Error',
+          'now',
+          'An error occured. Try again.'
+        )
       }
     },
     async createAccount () {
@@ -189,15 +196,58 @@ export default {
         await axios(config)
         // this.accounts = response.data.data
         // console.log(response.data)
-        this.showToast('primary', 'Success', 'now', 'Account added')
+        this.showToast(
+          'primary',
+          'Success',
+          'now',
+          'Account added'
+        )
 
         this.getAccounts()
         // console.log(this.accounts)
       } catch (error) {
+        this.showToast(
+          'danger',
+          'Error',
+          'now',
+          'An error occured. Try again.'
+        )
         console.log(error)
       }
 
       console.log('Account created')
+    },
+    async deleteAccount (id) {
+      const isOk = confirm('Are you sure?')
+
+      if (!isOk) return
+
+      const axios = require('axios')
+
+      const config = {
+        method: 'delete',
+        url: 'http://localhost:5000/api/v1/do_accounts/' + id,
+        headers: {}
+      }
+
+      try {
+        await axios(config)
+        this.showToast(
+          'primary',
+          'Success',
+          'now',
+          'Account #' + id + ' deleted'
+        )
+        this.getAccounts()
+      } catch (error) {
+        this.showToast(
+          'danger',
+          'Error',
+          'now',
+          'An error occured. Try again.'
+        )
+        console.log(error)
+      }
     }
   },
   mounted: function () {

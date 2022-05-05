@@ -1,5 +1,5 @@
 <template>
-  <li class="menu-item" :class="{active: isActive}">
+  <li class="menu-item" :class="{ active: isActive }">
     <router-link :to="href" class="menu-link">
       <i class="menu-icon" :class="iconClasses"></i>
       <div data-i18n="Analytics">{{ text }}</div>
@@ -12,10 +12,21 @@ export default {
   props: ['href', 'iconClasses', 'text'],
   computed: {
     isActive () {
-      if (this.$route.href === this.href) {
-        return true
+      const routeHref = this.$route.path
+      const currentPath = this.href.replace('/', '')
+
+      if (routeHref !== '/' && currentPath) {
+        if (routeHref.includes(currentPath)) {
+          return true
+        } else {
+          return false
+        }
       } else {
-        return false
+        if (routeHref === '/' && currentPath === '') {
+          return true
+        } else {
+          return false
+        }
       }
     }
   }
