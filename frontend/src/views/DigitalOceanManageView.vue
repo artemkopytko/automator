@@ -123,6 +123,64 @@
                 </div>
               </form>
             </div>
+
+             <h5 class="card-header">Account Droplets</h5>
+             <div class="card-body">
+                 <div class="table-responsive text-nowrap">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Droplet Name</th>
+                    <th>IP Address</th>
+                    <th>Health</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody v-if="droplets.length > 0" class="table-border-bottom-0">
+                  <tr v-for="(droplet, i) in droplets" :key="droplet.id">
+                    <td>{{ ++i }}</td>
+                    <td>
+                      <strong>{{ droplet.name }}</strong>
+                    </td>
+                    <td>
+                      {{ droplet.ip }}
+                    </td>
+                    <td>
+                      {{ !droplet.locked && droplet.status == 'active' ? 'Good' : 'Bad' }}
+                    </td>
+                    <td>
+                      <div class="dropdown">
+                        <button
+                          type="button"
+                          class="btn p-0 dropdown-toggle hide-arrow"
+                          data-bs-toggle="dropdown"
+                          aria-expanded="false"
+                        >
+                          <i class="fa-solid fa-ellipsis-vertical"></i>
+                        </button>
+                        <div class="dropdown-menu" style="">
+                          <a
+                            class="dropdown-item"
+                            disabled
+                            href="javascript:void(0);"
+                            style="pointer-events: none; cursor: default"
+                            ><i class="bx bx-edit-alt me-1"></i> Edit (in
+                            dev)</a
+                          >
+                          <a
+                            class="dropdown-item"
+                            href="javascript:void(0);"
+                            ><i class="bx bx-trash me-1"></i> Delete</a
+                          >
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+               </div>
           </div>
           <div
             class="tab-pane fade"
@@ -221,6 +279,7 @@ export default {
     return {
       accountId: this.$route.params.id,
       account: {},
+      droplets: {},
       accountDomains: [],
       domainsFetched: false,
       toastIsVisible: false,
@@ -253,7 +312,9 @@ export default {
       }
       try {
         const response = await axios(config)
-        this.account = response.data.data
+        this.account = response.data.account
+        this.droplets = response.data.droplets
+        console.log(this.droplets)
       } catch (error) {
         console.log(error)
         this.showToast('danger', 'Error', 'now', 'An error occured. Try again.')

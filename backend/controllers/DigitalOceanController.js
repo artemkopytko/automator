@@ -63,7 +63,13 @@ const getDoAccount = async (req, res) => {
         }
       })
 
-      res.status(200).json({ success: true, data: account })
+      const droplets = await Droplet.findMany({
+        where: {
+          DigitalOceanAccountId: id
+        }
+      })
+
+      res.status(200).json({ success: true, account, droplets })
     } catch (error) {
       res.status(400).json({ success: false, msg: 'Error. Can not get an account' })
     }
