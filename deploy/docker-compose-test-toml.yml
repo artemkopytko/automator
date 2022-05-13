@@ -1,0 +1,67 @@
+version: "3.9"
+services:
+  traefik:
+    image: "traefik:v2.6"
+    container_name: "traefik"
+    restart: always
+    networks:
+      - web
+    ports:
+      - "80:80"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - ./traefik.toml:/traefik.toml
+      - ./acme.json:/acme.json
+  backend:
+    container_name: ${APP_NAME}-backend
+    build: ../backend
+    image: ${APP_NAME}/backend
+    restart: always
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mysql
+    env_file:
+      - backend.env
+    networks:
+      - app
+
+  frontend:
+    container_name: ${APP_NAME}-frontend
+    build: ../frontend
+    image: ${APP_NAME}/frontend
+    restart: always
+    ports:
+      - "8080:80"
+    environment:
+      NODE_ENV: 'development'
+    volumes:
+     - ../frontend/nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - backend
+    networks:
+      - app
+
+  mysql:
+    container_name: ${APP_NAME}-mysql
+    image: mysql:8.0.29
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASS: ${MYSQL_PASS}
+    ports:
+      - "3308:3306"
+    volumes:
+      - mysql:/var/lib/mysql
+    networks:
+      - app
+
+volumes:
+  mysql: 
+
+networks:
+  web:
+    external: true
+  app: 
+    driver: bridge

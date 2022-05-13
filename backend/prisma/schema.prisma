@@ -28,7 +28,7 @@ model ControlPanel {
 
 model Domain {
   id                    Int                  @id @default(autoincrement())
-  name                  String
+  name                  String               @unique
   ttl                   Int?
   zone_file             String?
   DomainRecords         DomainRecord[]
@@ -48,6 +48,18 @@ model DomainRecord {
   DomainId Int?
 }
 
+model Droplet {
+  id                    Int                  @id @default(autoincrement())
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
+  name                  String
+  locked                Boolean
+  status                String
+  ip                    String               @unique
+  DigitalOceanAccount   DigitalOceanAccount? @relation(fields: [DigitalOceanAccountId], references: [id])
+  DigitalOceanAccountId Int?
+}
+
 model DigitalOceanAccount {
   id            Int            @id @default(autoincrement())
   createdAt     DateTime       @default(now())
@@ -57,5 +69,5 @@ model DigitalOceanAccount {
   accessToken   String         @unique
   ControlPanels ControlPanel[]
   Domains       Domain[]
+  Droplets      Droplet[]
 }
-

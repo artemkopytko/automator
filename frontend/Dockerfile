@@ -1,13 +1,12 @@
-#STEP 1 BUILD VUE PROJECT
-FROM node:16.14.2-alpine AS build 
+FROM node:16.14.2-alpine as build
 WORKDIR /app
 COPY package*.json ./
 RUN npm install
-COPY ./ .
+COPY . .
 RUN npm run build
- 
-#STEP 2 CREATE NGNIX SERVER
-FROM nginx:stable-alpine AS production
-COPY --from=build /app/dist /usr/share/nginx/html
-EXPOSE 80
-CMD ["nginx","-g","daemon off;"]
+
+FROM nginx:stable-alpine as production
+RUN mkdir /html
+COPY nginx.conf /etc/nginx/nginx.conf
+COPY --from=build /app/dist /app/html
+ENTRYPOINT ["nginx", "-g", "daemon off;"]

@@ -4,7 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon app.js"
+    "generate": "npx prisma generate",
+    "start": "nodemon app.js",
+    "start:prod": "node app.js",
+    "start:migrate:prod": "prisma migrate deploy && npm run start:prod"
   },
   "author": "",
   "license": "ISC",

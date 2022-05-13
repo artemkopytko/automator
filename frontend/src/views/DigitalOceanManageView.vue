@@ -31,6 +31,7 @@
         type="button"
         class="nav-link"
         role="tab"
+        @click="getDomainsList"
         data-bs-toggle="tab"
         data-bs-target="#navs-pills-justified-profile"
         aria-controls="navs-pills-justified-profile"
@@ -55,8 +56,6 @@
   </ul>
 
   <div class="card">
-    <h5 class="card-header">Account Details</h5>
-
     <div class="col-12">
       <div class="nav-align-top mb-4">
         <div class="">
@@ -65,6 +64,7 @@
             id="navs-pills-justified-home"
             role="tabpanel"
           >
+          <h5 class="card-header">Account Details</h5>
             <div class="card-body">
               <form
                 id="formAccountSettings"
@@ -73,7 +73,9 @@
               >
                 <div class="row">
                   <div class="mb-3 col-md-6">
-                    <label for="accountName" class="form-label">Account Name</label>
+                    <label for="accountName" class="form-label"
+                      >Account Name</label
+                    >
                     <input
                       class="form-control"
                       type="text"
@@ -83,7 +85,9 @@
                     />
                   </div>
                   <div class="mb-3 col-md-6">
-                    <label for="accessToken" class="form-label">Access Token</label>
+                    <label for="accessToken" class="form-label"
+                      >Access Token</label
+                    >
                     <input
                       class="form-control"
                       type="text"
@@ -93,7 +97,9 @@
                     />
                   </div>
                   <div class="mb-3 col-md-6">
-                    <label class="form-label" for="country">Control Panel</label>
+                    <label class="form-label" for="country"
+                      >Control Panel</label
+                    >
                     <select id="country" class="select2 form-select" disabled>
                       <option value="">Select Panel</option>
                       <option value="">Hestia</option>
@@ -123,16 +129,65 @@
             id="navs-pills-justified-profile"
             role="tabpanel"
           >
-            <p>
-              Donut dragée jelly pie halvah. Danish gingerbread bonbon cookie
-              wafer candy oat cake ice cream. Gummies halvah tootsie roll muffin
-              biscuit icing dessert gingerbread. Pastry ice cream cheesecake
-              fruitcake.
-            </p>
-            <p class="mb-0">
-              Jelly-o jelly beans icing pastry cake cake lemon drops. Muffin
-              muffin pie tiramisu halvah cotton candy liquorice caramels.
-            </p>
+          <h5 class="card-header">Account Domains</h5>
+            <div class="table-responsive text-nowrap">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Domain Name</th>
+                    <th>TTL</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody v-if="accountDomains.length > 0" class="table-border-bottom-0">
+                  <tr v-for="(domain, i) in accountDomains" :key="domain.id">
+                    <td>{{ ++i }}</td>
+                    <td>
+                      <strong>{{ domain.name }}</strong>
+                    </td>
+                    <td>
+                      {{ domain.ttl }}
+                    </td>
+                    <td>
+                      <div class="dropdown">
+                        <button
+                          type="button"
+                          class="btn p-0 dropdown-toggle hide-arrow"
+                          data-bs-toggle="dropdown"
+                          aria-expanded="false"
+                        >
+                          <i class="fa-solid fa-ellipsis-vertical"></i>
+                        </button>
+                        <div class="dropdown-menu" style="">
+                          <a
+                            class="dropdown-item"
+                            disabled
+                            href="javascript:void(0);"
+                            style="pointer-events: none; cursor: default"
+                            ><i class="bx bx-edit-alt me-1"></i> Edit (in
+                            dev)</a
+                          >
+                          <a
+                            class="dropdown-item"
+                            href="javascript:void(0);"
+                            ><i class="bx bx-trash me-1"></i> Delete</a
+                          >
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="m-3">
+              <button
+                type="button"
+                class="btn btn-primary"
+              >
+                Update List
+              </button>
+            </div>
           </div>
           <!-- <div
               class="tab-pane fade"
@@ -166,6 +221,8 @@ export default {
     return {
       accountId: this.$route.params.id,
       account: {},
+      accountDomains: [],
+      domainsFetched: false,
       toastIsVisible: false,
       toastClass: '', // bg-primary bg-secondary bg-success bg-danger bg-warning
       toastTitle: '',
@@ -188,7 +245,7 @@ export default {
     async getAccount () {
       const config = {
         method: 'get',
-        url: 'http://localhost:5000/api/v1/do_accounts/' + this.accountId,
+        url: '/api/v1/do_accounts/' + this.accountId,
         headers: {
           'Access-Control-Allow-Origin': '*',
           'Content-Type': 'application/json'
@@ -202,18 +259,47 @@ export default {
         this.showToast('danger', 'Error', 'now', 'An error occured. Try again.')
       }
     },
-    async getAccountDomains () {
+    async getDomainsList () {
+      if (!this.domainsFetched) {
+        const config = {
+          method: 'get',
+          url: '/api/v1/do_accounts/' + this.accountId + '/domains',
+          headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Content-Type': 'application/json'
+          }
+        }
+        try {
+          this.domainsFetched = true
+          const response = await axios(config)
+          this.accountDomains = response.data.data
+        } catch (error) {
+          console.log(error)
+          this.showToast(
+            'danger',
+            'Error',
+            'now',
+            'An error occured. Try again.'
+          )
+        }
+      }
+    },
+    async forceUpdateDomains () {
       const config = {
         method: 'get',
-        url: 'http://localhost:5000/api/v1/do_accounts/' + this.accountId,
+        url:
+          '/api/v1/do_accounts/' +
+          this.accountId +
+          'domains/fetch',
         headers: {
           'Access-Control-Allow-Origin': '*',
           'Content-Type': 'application/json'
         }
       }
       try {
-        const response = await axios(config)
-        this.account = response.data.data
+        await axios(config)
+        this.domainsFetched = false
+        this.getDomainsList()
       } catch (error) {
         console.log(error)
         this.showToast('danger', 'Error', 'now', 'An error occured. Try again.')
@@ -236,5 +322,9 @@ export default {
 
 tr {
   text-align: center;
+}
+
+.tab-pane.fade:not(.show) {
+  display: none !important;
 }
 </style>

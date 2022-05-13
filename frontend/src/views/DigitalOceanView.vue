@@ -148,7 +148,7 @@ export default {
     async getAccounts () {
       const config = {
         method: 'get',
-        url: 'http://localhost:5000/api/v1/do_accounts',
+        url: '/api/v1/do_accounts',
         headers: {
           'Access-Control-Allow-Origin': '*',
           'Content-Type': 'application/json'
@@ -184,7 +184,7 @@ export default {
 
       const config = {
         method: 'post',
-        url: 'http://localhost:5000/api/v1/do_accounts',
+        url: '/api/v1/do_accounts',
         headers: {
           'Access-Control-Allow-Origin': '*',
           'Content-Type': 'application/json'
@@ -226,7 +226,7 @@ export default {
 
       const config = {
         method: 'delete',
-        url: 'http://localhost:5000/api/v1/do_accounts/' + id,
+        url: '/api/v1/do_accounts/' + id,
         headers: {}
       }
 
