@@ -1,15 +1,8 @@
 const express = require('express')
 const apiRoutes = express.Router()
-const {
-  getDoAccounts,
-  getDoAccount,
-  createDoAccount,
-  editDoAccount,
-  deleteDoAccount,
-  getDoAccountDomains,
-  getDoAccountDomainsLocal,
-  getDoAccountDroplets
-} = require('../controllers/DigitalOceanController')
+const { fetchDroplets, getDroplets } = require('../controllers/DigitalOcean/droplets.controller')
+const { getDomains, fetchDomains } = require('../controllers/DigitalOcean/domains.controller')
+const { getDoAccounts, getDoAccount, createDoAccount, editDoAccount, deleteDoAccount } = require('../controllers/DigitalOcean/accounts.controller')
 
 apiRoutes.route('/do_accounts')
   .get(getDoAccounts)
@@ -21,14 +14,17 @@ apiRoutes.route('/do_accounts/:id')
   .delete(deleteDoAccount)
 
 // Получение списка доменов по ID из БД
-apiRoutes.route('/do_accounts/:id/domains/')
-  .get(getDoAccountDomainsLocal)
+apiRoutes.route('/do_accounts/:id/domains')
+  .get(getDomains)
 
 // Получение списка доменов по ID из Digital Ocean по API
 apiRoutes.route('/do_accounts/:id/domains/fetch')
-  .get(getDoAccountDomains)
+  .get(fetchDomains)
+
+apiRoutes.route('/do_accounts/:id/droplets')
+  .get(getDroplets)
 
 apiRoutes.route('/do_accounts/:id/droplets/fetch')
-  .get(getDoAccountDroplets)
+  .get(fetchDroplets)
 
 module.exports = apiRoutes

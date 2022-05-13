@@ -171,7 +171,8 @@
                           <a
                             class="dropdown-item"
                             href="javascript:void(0);"
-                            ><i class="bx bx-trash me-1"></i> Delete</a
+                            style="pointer-events: none; cursor: default"
+                            ><i class="bx bx-trash me-1"></i> Delete (in dev)</a
                           >
                         </div>
                       </div>
@@ -229,7 +230,8 @@
                           <a
                             class="dropdown-item"
                             href="javascript:void(0);"
-                            ><i class="bx bx-trash me-1"></i> Delete</a
+                            style="pointer-events: none; cursor: default"
+                            ><i class="bx bx-trash me-1"></i> Delete (in dev)</a
                           >
                         </div>
                       </div>
