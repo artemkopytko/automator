@@ -1,7 +1,7 @@
 const express = require('express')
 const apiRoutes = express.Router()
 const { fetchDroplets, getDroplets } = require('../controllers/DigitalOcean/droplets.controller')
-const { getDomains, fetchDomains } = require('../controllers/DigitalOcean/domains.controller')
+const { getDomains, fetchDomains, addDomains } = require('../controllers/DigitalOcean/domains.controller')
 const { getDoAccounts, getDoAccount, createDoAccount, editDoAccount, deleteDoAccount } = require('../controllers/DigitalOcean/accounts.controller')
 
 apiRoutes.route('/do_accounts')
@@ -16,6 +16,7 @@ apiRoutes.route('/do_accounts/:id')
 // Получение списка доменов по ID из БД
 apiRoutes.route('/do_accounts/:id/domains')
   .get(getDomains)
+  .post(addDomains)
 
 // Получение списка доменов по ID из Digital Ocean по API
 apiRoutes.route('/do_accounts/:id/domains/fetch')

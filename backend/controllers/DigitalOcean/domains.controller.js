@@ -94,7 +94,79 @@ const fetchDomains = async (req, res) => {
   }
 }
 
+const addDomains = async (req, res) => {
+  const id = Number(req.params.id)
+  if (id) {
+    try {
+      const account = await DigitalOceanAccount.findFirst({
+        where: {
+          id
+        }
+      })
+
+      // console.log({ account })
+
+      const { domains, ip } = req.body
+      if (domains && ip && domains.length > 0) {
+        const promises = domains.map(async (domain) => {
+          const config = {
+            method: 'post',
+            url: 'https://api.digitalocean.com/v2/domains',
+            headers: {
+              Accept: 'application/json',
+              'Content-Type': 'application/json',
+              Authorization: 'Bearer ' + account.accessToken
+            },
+            data: JSON.stringify({
+              name: domain,
+              ip_address: ip
+            })
+          }
+          return await axios(config)
+        })
+
+        const result = await Promise.allSettled(promises)
+
+        const response = []
+        result.forEach((value, index) => {
+          // console.log({ value })
+
+          if (value.status === 'rejected') {
+            // console.log(value.reason.response.statusText)
+            // console.log('Can\'t create ' + domains[index])
+            response.push({
+              name: domains[index],
+              success: false
+            })
+          } else if (value.value.value === 'Created') {
+            response.push({
+              name: domains[index],
+              success: true
+            })
+            // console.log({ value })
+            // console.log('created')
+          } else {
+            response.push({
+              name: domains[index],
+              success: false
+            })
+          }
+        })
+
+        res.status(200).json({ success: true, domains: response })
+      } else {
+        res.status(400).json({ success: false, msg: 'Error. Param domains or ip is missing' })
+      }
+    } catch (error) {
+      res.status(400).json({ success: false, msg: 'Error. Can not get account details' })
+    }
+  } else {
+    res.status(400).json({ success: false, msg: 'Error. Account id is invalid number' })
+  }
+}
+
 module.exports = {
   getDomains,
-  fetchDomains
+  fetchDomains,
+  addDomains
 }

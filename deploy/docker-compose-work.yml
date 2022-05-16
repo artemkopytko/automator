@@ -1,0 +1,112 @@
+version: "3.9"
+services:
+  traefik:
+    image: "traefik:v2.6"
+    container_name: "traefik"
+    command:
+      - "--log.level=DEBUG"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
+      #- "--certificatesresolvers.myresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
+      - "--certificatesresolvers.myresolver.acme.email=affstechsupp@gmail.com"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+    ports:
+      - "443:443"
+      - "80:80"
+    volumes:
+      - "./letsencrypt:/letsencrypt"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+
+  frontend:
+    container_name: ${APP_NAME}-frontend
+    build: ../frontend
+    image: ${APP_NAME}/frontend
+    restart: always
+    # volumes:
+    #   - ../frontend/nginx.conf:/etc/nginx/nginx.conf
+    # depends_on:
+    #   - backend
+    # networks:
+    #   - app
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=Host(`${APP_HOST}`)"
+      - "traefik.http.routers.frontend.entrypoints=websecure"
+      - "traefik.http.routers.frontend.tls.certresolver=myresolver"
+    # depends_on:
+    #   - backend
+    networks:
+      - traefik
+      - internal
+  # backend:
+  #   container_name: ${APP_NAME}-backend
+  #   build: ../backend
+  #   image: ${APP_NAME}/backend
+  #   restart: always
+  #   ports:
+  #     - 5000:5000
+  #   labels:
+  #     - traefik.enable=true
+  #     - traefik.http.routers.backend.rule=Host(`${APP_HOST}`) && PathPrefix(`/api`)
+  #     - traefik.http.routers.backend.tls=true
+  #     - traefik.http.routers.backend.tls.certresolver=letsencrypt
+  #   env_file:
+  #     - backend.env
+  #   depends_on:
+  #     - mysql
+  #   networks:
+  #     - traefik
+  #     - internal
+
+  # mysql:
+  #   container_name: ${APP_NAME}-mysql
+  #   image: mysql:8.0.29
+  #   restart: always
+  #   environment:
+  #     MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+  #     MYSQL_USER: ${MYSQL_USER}
+  #     MYSQL_PASS: ${MYSQL_PASS}
+  #   ports:
+  #     - "3308:3306"
+  #   volumes:
+  #     - mysql:/var/lib/mysql
+  #     # - ./mariadb/data:/var/lib/mysql
+  #     # - ./mariadb/conf:/etc/mysql
+  #   networks:
+  #     - internal
+
+  # volumes:
+  #   mysql: 
+
+networks:
+  traefik:
+    external: true
+  internal:
+    external: false
+
+#   backend:
+#     container_name: ${APP_NAME}-backend
+#     build: ../backend
+#     image: ${APP_NAME}/backend
+#     restart: unless-stopped
+#     ports:
+#       - "5000:5000"
+#     depends_on:
+#       - mysql
+#     env_file:
+#       - backend.env
+#     environment:
+#       NODE_ENV: 'development'
+#     networks:
+#       - app
+
+
+
+
+
+# networks:
+#   app:
+#     driver: bridge

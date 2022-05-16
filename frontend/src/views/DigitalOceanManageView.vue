@@ -64,7 +64,7 @@
             id="navs-pills-justified-home"
             role="tabpanel"
           >
-          <h5 class="card-header">Account Details</h5>
+            <h5 class="card-header">Account Details</h5>
             <div class="card-body">
               <form
                 id="formAccountSettings"
@@ -124,71 +124,79 @@
               </form>
             </div>
 
-             <h5 class="card-header">Account Droplets</h5>
-             <div class="card-body">
-                 <div class="table-responsive text-nowrap">
-              <table class="table">
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>Droplet Name</th>
-                    <th>IP Address</th>
-                    <th>Health</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody v-if="droplets.length > 0" class="table-border-bottom-0">
-                  <tr v-for="(droplet, i) in droplets" :key="droplet.id">
-                    <td>{{ ++i }}</td>
-                    <td>
-                      <strong>{{ droplet.name }}</strong>
-                    </td>
-                    <td>
-                      {{ droplet.ip }}
-                    </td>
-                    <td>
-                      {{ !droplet.locked && droplet.status == 'active' ? 'Good' : 'Bad' }}
-                    </td>
-                    <td>
-                      <div class="dropdown">
-                        <button
-                          type="button"
-                          class="btn p-0 dropdown-toggle hide-arrow"
-                          data-bs-toggle="dropdown"
-                          aria-expanded="false"
-                        >
-                          <i class="fa-solid fa-ellipsis-vertical"></i>
-                        </button>
-                        <div class="dropdown-menu" style="">
-                          <a
-                            class="dropdown-item"
-                            disabled
-                            href="javascript:void(0);"
-                            style="pointer-events: none; cursor: default"
-                            ><i class="bx bx-edit-alt me-1"></i> Edit (in
-                            dev)</a
+            <h5 class="card-header">Account Droplets</h5>
+            <div class="card-body">
+              <div class="table-responsive text-nowrap">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Droplet Name</th>
+                      <th>IP Address</th>
+                      <th>Health</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody
+                    v-if="droplets.length > 0"
+                    class="table-border-bottom-0"
+                  >
+                    <tr v-for="(droplet, i) in droplets" :key="droplet.id">
+                      <td>{{ ++i }}</td>
+                      <td>
+                        <strong>{{ droplet.name }}</strong>
+                      </td>
+                      <td>
+                        {{ droplet.ip }}
+                      </td>
+                      <td>
+                        {{
+                          !droplet.locked && droplet.status == "active"
+                            ? "Good"
+                            : "Bad"
+                        }}
+                      </td>
+                      <td>
+                        <div class="dropdown">
+                          <button
+                            type="button"
+                            class="btn p-0 dropdown-toggle hide-arrow"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false"
                           >
-                          <a
-                            class="dropdown-item"
-                            href="javascript:void(0);"
-                            style="pointer-events: none; cursor: default"
-                            ><i class="bx bx-trash me-1"></i> Delete (in dev)</a
-                          >
+                            <i class="fa-solid fa-ellipsis-vertical"></i>
+                          </button>
+                          <div class="dropdown-menu" style="">
+                            <a
+                              class="dropdown-item"
+                              disabled
+                              href="javascript:void(0);"
+                              style="pointer-events: none; cursor: default"
+                              ><i class="bx bx-edit-alt me-1"></i> Edit (in
+                              dev)</a
+                            >
+                            <a
+                              class="dropdown-item"
+                              href="javascript:void(0);"
+                              style="pointer-events: none; cursor: default"
+                              ><i class="bx bx-trash me-1"></i> Delete (in
+                              dev)</a
+                            >
+                          </div>
                         </div>
-                      </div>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
-               </div>
           </div>
           <div
             class="tab-pane fade"
             id="navs-pills-justified-profile"
             role="tabpanel"
           >
-          <h5 class="card-header">Account Domains</h5>
+            <h5 class="card-header">Account Domains</h5>
             <div class="table-responsive text-nowrap">
               <table class="table">
                 <thead>
@@ -199,7 +207,10 @@
                     <th>Actions</th>
                   </tr>
                 </thead>
-                <tbody v-if="accountDomains.length > 0" class="table-border-bottom-0">
+                <tbody
+                  v-if="accountDomains.length > 0"
+                  class="table-border-bottom-0"
+                >
                   <tr v-for="(domain, i) in accountDomains" :key="domain.id">
                     <td>{{ ++i }}</td>
                     <td>
@@ -244,8 +255,17 @@
               <button
                 type="button"
                 class="btn btn-primary"
+                @click="forceUpdateDomains"
               >
                 Update List
+              </button>
+              <button
+                type="button"
+                class="btn btn-success mx-3"
+                data-bs-toggle="modal"
+                data-bs-target="#modalCenter"
+              >
+                Add Domains
               </button>
             </div>
           </div>
@@ -269,6 +289,75 @@
       </div>
     </div>
   </div>
+
+  <div
+    class="modal fade"
+    id="modalCenter"
+    tabindex="-1"
+    style="display: none"
+    aria-modal="true"
+    role="dialog"
+  >
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalCenterTitle">Add Domains</h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <div>
+            <label for="exampleFormControlTextarea1" class="form-label"
+              >Domains list</label
+            >
+            <textarea
+              class="form-control"
+              id="exampleFormControlTextarea1"
+              rows="3"
+              v-model="domainsToAdd"
+            ></textarea>
+          </div>
+          <div class="row">
+            <div class="mb-3">
+              <label for="defaultSelect" class="form-label">Select IP</label>
+              <select id="defaultSelect" class="form-select" v-model="ipToAdd">
+                <option disabled value="">Please select droplet IP</option>
+                <option v-for="(droplet, i) in droplets" :key="i">
+                  {{ droplet.ip }}
+                </option>
+              </select>
+            </div>
+          </div>
+          <div class="row" v-if="respDomains.length > 0">
+            <p v-for="(domain, i) in respDomains" :key="i">
+              {{ domain.name }} - {{ domain.success }}
+            </p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-outline-secondary"
+            data-bs-dismiss="modal"
+          >
+            Close
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary"
+            @click="addDomains"
+            :disabled="!ipToAdd || !domainsToAdd"
+          >
+            Add Domains
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -288,7 +377,10 @@ export default {
       toastClass: '', // bg-primary bg-secondary bg-success bg-danger bg-warning
       toastTitle: '',
       toastTime: '',
-      toastText: ''
+      toastText: '',
+      domainsToAdd: '',
+      ipToAdd: '',
+      respDomains: []
     }
   },
   methods: {
@@ -350,10 +442,7 @@ export default {
     async forceUpdateDomains () {
       const config = {
         method: 'get',
-        url:
-          '/api/v1/do_accounts/' +
-          this.accountId +
-          'domains/fetch',
+        url: '/api/v1/do_accounts/' + this.accountId + '/domains/fetch',
         headers: {
           'Access-Control-Allow-Origin': '*',
           'Content-Type': 'application/json'
@@ -366,6 +455,35 @@ export default {
       } catch (error) {
         console.log(error)
         this.showToast('danger', 'Error', 'now', 'An error occured. Try again.')
+      }
+    },
+    async addDomains () {
+      const domains = [...new Set(this.domainsToAdd.split('\n'))].filter(
+        (n) => n
+      )
+      const ip = this.ipToAdd
+      console.log({ domains, ip })
+
+      const config = {
+        method: 'post',
+        url: '/api/v1/do_accounts/' + this.accountId + '/domains',
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Content-Type': 'application/json'
+        },
+        data: {
+          domains,
+          ip
+        }
+      }
+
+      try {
+        const resp = await axios(config)
+        console.log(resp)
+        this.respDomains = resp.data.domains
+      } catch (error) {
+        console.log(error)
+        this.showToast('danger', 'Error', 'now', error.response.data.msg)
       }
     }
   },
