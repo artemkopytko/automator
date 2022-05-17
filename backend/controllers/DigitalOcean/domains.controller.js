@@ -129,26 +129,31 @@ const addDomains = async (req, res) => {
 
         const response = []
         result.forEach((value, index) => {
-          // console.log({ value })
+          console.log({ value })
 
           if (value.status === 'rejected') {
+            // console.log(value)
             // console.log(value.reason.response.statusText)
             // console.log('Can\'t create ' + domains[index])
             response.push({
               name: domains[index],
-              success: false
+              success: false,
+              code: value.reason.response.statusText
             })
-          } else if (value.value.value === 'Created') {
+          } else if (value.value.statusText === 'Created') {
+            console.log(value)
             response.push({
               name: domains[index],
-              success: true
+              success: true,
+              code: value.value.value.statusText
             })
             // console.log({ value })
             // console.log('created')
           } else {
             response.push({
               name: domains[index],
-              success: false
+              success: false,
+              code: value.reason.response.statusText
             })
           }
         })

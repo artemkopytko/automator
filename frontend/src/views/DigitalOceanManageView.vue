@@ -298,7 +298,7 @@
     aria-modal="true"
     role="dialog"
   >
-    <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="modalCenterTitle">Add Domains</h5>
@@ -332,10 +332,27 @@
               </select>
             </div>
           </div>
-          <div class="row" v-if="respDomains.length > 0">
-            <p v-for="(domain, i) in respDomains" :key="i">
-              {{ domain.name }} - {{ domain.success }}
-            </p>
+          <div class="card result-card" v-if="respDomains.length > 0">
+            <h5 class="card-header">Result</h5>
+            <div class="table-responsive text-nowrap">
+              <table class="table">
+                <thead>
+                  <tr class="text-nowrap">
+                    <th>#</th>
+                    <th>Domain</th>
+                    <th>Status Code</th>
+
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(domain, i) in respDomains" :key="i" :class="domain.status === 'Created' ? 'bg-success' : 'bg-danger'">
+                    <th scope="row">{{ ++i }}</th>
+                    <td>{{ domain.name }}</td>
+                    <td>{{ domain.code}}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
         <div class="modal-footer">
@@ -507,5 +524,19 @@ tr {
 
 .tab-pane.fade:not(.show) {
   display: none !important;
+}
+
+.result-card {
+  overflow-x: scroll;
+}
+
+tr.bg-danger {
+  background-color: lightcoral !important;
+  color: black;
+}
+
+tr.bg-success {
+  background-color: lightgreen !important;
+  color: black;
 }
 </style>
