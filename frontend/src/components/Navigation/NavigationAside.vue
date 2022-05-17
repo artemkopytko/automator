@@ -4,7 +4,7 @@
       <router-link to="/" class="app-brand-link">
         <span class="app-brand-logo demo"> </span>
         <span class="app-brand-text demo menu-text fw-bolder ms-2"
-          >Vue & Node.js</span
+          >space profit 🚀</span
         >
       </router-link>
 

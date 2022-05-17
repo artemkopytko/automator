@@ -469,6 +469,7 @@ export default {
         await axios(config)
         this.domainsFetched = false
         this.getDomainsList()
+        this.showToast('success', 'Success', 'now', 'List of domains updated')
       } catch (error) {
         console.log(error)
         this.showToast('danger', 'Error', 'now', 'An error occured. Try again.')
@@ -532,6 +533,10 @@ tr {
 
 tr.bg-danger {
   background-color: lightcoral !important;
+  color: black;
+}
+
+tr th {
   color: black;
 }
 

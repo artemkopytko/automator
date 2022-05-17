@@ -53,35 +53,24 @@ const fetchDomains = async (req, res) => {
         }
 
         try {
-          // !FIX Fetch current list. Then Delete only those domains which NOT exist in response.data.domains
-          await Domain.deleteMany({
-            where: {
-              DigitalOceanAccountId: id
-            }
+          await Domain.createMany({
+            data: response.data.domains,
+            skipDuplicates: true
           })
+
           try {
-            // !FIX Rewrite to upsert forEach
-            await Domain.createMany({
-              data: response.data.domains,
-              skipDuplicates: true
+            const domains = await Domain.findMany({
+              where: {
+                DigitalOceanAccountId: id
+              }
             })
 
-            try {
-              const domains = await Domain.findMany({
-                where: {
-                  DigitalOceanAccountId: id
-                }
-              })
-
-              res.status(200).json({ success: true, data: domains })
-            } catch (error) {
-
-            }
+            res.status(200).json({ success: true, data: domains })
           } catch (error) {
-            res.status(400).json({ success: false, msg: 'Error. Can not add new domains' })
+            res.status(400).json({ success: false, msg: 'Error. Can get new domains' })
           }
         } catch (error) {
-          res.status(400).json({ success: false, msg: 'Error. Can not delete existing domains' })
+          res.status(400).json({ success: false, msg: 'Error. Can not add new domains' })
         }
       } catch (error) {
         res.status(400).json({ success: false, msg: 'Error. Can not get account domains' })
@@ -145,7 +134,7 @@ const addDomains = async (req, res) => {
             response.push({
               name: domains[index],
               success: true,
-              code: value.value.value.statusText
+              code: value.value.statusText
             })
             // console.log({ value })
             // console.log('created')

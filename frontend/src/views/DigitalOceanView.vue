@@ -84,6 +84,13 @@
       >
         Add Account
       </button>
+       <button
+        type="button"
+        class="btn btn-outline-dark mx-3"
+        @click="updateAllAccounts"
+      >
+        Update all accounts
+      </button>
     </div>
   </div>
 
@@ -248,6 +255,9 @@ export default {
         )
         console.log(error)
       }
+    },
+    async updateAllAccounts () {
+
     }
   },
   mounted: function () {

@@ -34,4 +34,8 @@ export default {
 .toast-header i {
   margin-right: 5px;
 }
+
+.bg-success, .bg-success small, .bg-success div, .bg-success i {
+  color: black !important;
+}
 </style>
