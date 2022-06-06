@@ -1,6 +1,34 @@
+const { encrypt, decrypt } = require('../../utils/crypto')
 const { DigitalOceanAccount } = require('../../models/DigitalOceanAccount')
 const { Domain } = require('../../models/Domain')
 const { Droplet } = require('../../models/Droplet')
+
+// Converting accessToken field to secured variant
+
+// const secureDoAccountTokens = async (req, res) => {
+//   const accounts = await DigitalOceanAccount.findMany({
+//     where: {
+//       secureToken: null
+//     }
+//   })
+
+//   for (const account of accounts) {
+//     const encrypted = encrypt(account.accessToken)
+//     console.log(account.id, encrypted)
+
+//     await DigitalOceanAccount.update({
+//       where: {
+//         id: account.id
+//       },
+//       data: {
+//         iv: encrypted.iv,
+//         secureToken: encrypted.content
+//       }
+//     })
+//   }
+
+//   res.status(200).json({ success: true })
+// }
 
 const getDoAccounts = async (req, res) => {
   try {
@@ -18,13 +46,18 @@ const getDoAccounts = async (req, res) => {
     // console.log(result)
 
     result.forEach((value, index) => {
+      accounts[index].accessToken = decrypt({ iv: accounts[index].iv, content: accounts[index].secureToken })
       accounts[index].domainsCount = value.value
+
+      delete accounts[index].iv
+      delete accounts[index].secureToken
     })
 
     // console.log(accounts)
 
     res.status(200).json({ success: true, data: accounts })
   } catch (error) {
+    console.log(error)
     res.status(400).json({ success: false, msg: 'Error. Can not get list of accounts' })
   }
 }
@@ -34,11 +67,12 @@ const createDoAccount = async (req, res) => {
 
   if (name && accessToken) {
     try {
-      console.log(name, accessToken)
+      const encrypted = encrypt(accessToken)
       const account = await DigitalOceanAccount.create({
         data: {
           name,
-          accessToken
+          secureToken: encrypted.content,
+          iv: encrypted.iv
         }
       })
       console.log(account)
@@ -62,11 +96,16 @@ const getDoAccount = async (req, res) => {
         }
       })
 
+      account.accessToken = decrypt({ iv: account.iv, content: account.secureToken })
+
       const droplets = await Droplet.findMany({
         where: {
           DigitalOceanAccountId: id
         }
       })
+
+      delete account.iv
+      delete account.secureToken
 
       res.status(200).json({ success: true, account, droplets })
     } catch (error) {

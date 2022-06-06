@@ -3,7 +3,7 @@
     <div class="layout-container">
       <!-- Menu -->
 
-      <NavigationAside />
+      <NavigationAside v-if="showSidebar" />
       <!-- / Menu -->
 
       <!-- Layout container -->
@@ -41,6 +41,15 @@ import NavigationAside from '@/components/Navigation/NavigationAside.vue'
 export default {
   components: {
     NavigationAside
+  },
+  computed: {
+    showSidebar () {
+      if (this.$route.name === 'login' || this.$route.name === 'signup') {
+        return false
+      } else {
+        return true
+      }
+    }
   }
 }
 </script>

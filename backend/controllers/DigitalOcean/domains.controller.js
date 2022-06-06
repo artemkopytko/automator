@@ -51,26 +51,32 @@ const fetchDomains = async (req, res) => {
             response.data.domains[index].DigitalOceanAccountId = id
           })
         }
-
         try {
-          await Domain.createMany({
-            data: response.data.domains,
-            skipDuplicates: true
+          await Domain.deleteMany({
+            where: {
+              DigitalOceanAccountId: id
+            }
           })
-
           try {
-            const domains = await Domain.findMany({
-              where: {
-                DigitalOceanAccountId: id
-              }
+            await Domain.createMany({
+              data: response.data.domains,
+              skipDuplicates: true
             })
-
-            res.status(200).json({ success: true, data: domains })
+            try {
+              const domains = await Domain.findMany({
+                where: {
+                  DigitalOceanAccountId: id
+                }
+              })
+              res.status(200).json({ success: true, data: domains })
+            } catch (error) {
+              res.status(400).json({ success: false, msg: 'Error. Can get new domains' })
+            }
           } catch (error) {
-            res.status(400).json({ success: false, msg: 'Error. Can get new domains' })
+            res.status(400).json({ success: false, msg: 'Error. Can not add new domains' })
           }
         } catch (error) {
-          res.status(400).json({ success: false, msg: 'Error. Can not add new domains' })
+          res.status(400).json({ success: false, msg: 'Error. Can not delete  domains' })
         }
       } catch (error) {
         res.status(400).json({ success: false, msg: 'Error. Can not get account domains' })
@@ -159,8 +165,81 @@ const addDomains = async (req, res) => {
   }
 }
 
+const deleteDomains = async (req, res) => {
+  const id = Number(req.params.id)
+  if (id) {
+    try {
+      const account = await DigitalOceanAccount.findFirst({
+        where: {
+          id
+        }
+      })
+
+      // console.log({ account })
+
+      const { domains } = req.body
+      if (domains && domains.length > 0) {
+        const promises = domains.map(async (domain) => {
+          const config = {
+            method: 'delete',
+            url: 'https://api.digitalocean.com/v2/domains/' + domain,
+            headers: {
+              Accept: 'application/json',
+              'Content-Type': 'application/json',
+              Authorization: 'Bearer ' + account.accessToken
+            }
+          }
+          return await axios(config)
+        })
+
+        const result = await Promise.allSettled(promises)
+
+        const response = []
+        result.forEach((value, index) => {
+          console.log({ value })
+
+          if (value.status === 'rejected') {
+            // console.log(value)
+            // console.log(value.reason.response.statusText)
+            // console.log('Can\'t create ' + domains[index])
+            response.push({
+              name: domains[index],
+              success: false,
+              code: value.reason.response.statusText
+            })
+          } else if (value.value.status === 204) {
+            console.log(value)
+            response.push({
+              name: domains[index],
+              success: true,
+              code: value.value.statusText
+            })
+            // console.log({ value })
+            // console.log('created')
+          } else {
+            response.push({
+              name: domains[index],
+              success: false,
+              code: value.reason.response.statusText
+            })
+          }
+        })
+
+        res.status(200).json({ success: true, domains: response })
+      } else {
+        res.status(400).json({ success: false, msg: 'Error. Param domains or ip is missing' })
+      }
+    } catch (error) {
+      res.status(400).json({ success: false, msg: 'Error. Can not get account details' })
+    }
+  } else {
+    res.status(400).json({ success: false, msg: 'Error. Account id is invalid number' })
+  }
+}
+
 module.exports = {
   getDomains,
   fetchDomains,
-  addDomains
+  addDomains,
+  deleteDomains
 }

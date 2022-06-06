@@ -10,6 +10,14 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  username  String   @unique
+  password  String
+}
+
 model ControlPanel {
   id                    Int                  @id @default(autoincrement())
   createdAt             DateTime             @default(now())
@@ -66,7 +74,9 @@ model DigitalOceanAccount {
   updatedAt     DateTime       @updatedAt
   name          String         @unique
   status        Boolean        @default(true)
-  accessToken   String         @unique
+  accessToken   String?        @unique
+  secureToken   String?
+  iv            String?
   ControlPanels ControlPanel[]
   Domains       Domain[]
   Droplets      Droplet[]

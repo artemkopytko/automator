@@ -254,7 +254,7 @@
             <div class="m-3">
               <button
                 type="button"
-                class="btn btn-primary"
+                class="btn btn-primary mx-3"
                 @click="forceUpdateDomains"
               >
                 Update List
@@ -263,9 +263,17 @@
                 type="button"
                 class="btn btn-success mx-3"
                 data-bs-toggle="modal"
-                data-bs-target="#modalCenter"
+                data-bs-target="#modalCenterAdd"
               >
                 Add Domains
+              </button>
+              <button
+                type="button"
+                class="btn btn-danger mx-3"
+                data-bs-toggle="modal"
+                data-bs-target="#modalCenterDelete"
+              >
+                Delete Domains
               </button>
             </div>
           </div>
@@ -292,7 +300,7 @@
 
   <div
     class="modal fade"
-    id="modalCenter"
+    id="modalCenterAdd"
     tabindex="-1"
     style="display: none"
     aria-modal="true"
@@ -320,6 +328,7 @@
               rows="3"
               v-model="domainsToAdd"
             ></textarea>
+            <small v-if="domainsToAdd.split('\n').length > 1">Domains count: {{ domainsToAdd.split('\n').length }}</small>
           </div>
           <div class="row">
             <div class="mb-3">
@@ -345,7 +354,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="(domain, i) in respDomains" :key="i" :class="domain.status === 'Created' ? 'bg-success' : 'bg-danger'">
+                  <tr v-for="(domain, i) in respDomains" :key="i" :class="domain.code === 'Created' ? 'bg-success' : 'bg-danger'">
                     <th scope="row">{{ ++i }}</th>
                     <td>{{ domain.name }}</td>
                     <td>{{ domain.code}}</td>
@@ -375,6 +384,82 @@
       </div>
     </div>
   </div>
+
+  <div
+    class="modal fade"
+    id="modalCenterDelete"
+    tabindex="-1"
+    style="display: none"
+    aria-modal="true"
+    role="dialog"
+  >
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalCenterTitle">Delete Domains</h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <div>
+            <label for="exampleFormControlTextarea1" class="form-label"
+              >Domains list</label
+            >
+            <textarea
+              class="form-control"
+              id="exampleFormControlTextarea1"
+              rows="3"
+              v-model="domainsToDelete"
+            ></textarea>
+            <small v-if="domainsToDelete.split('\n').length > 1">Domains count: {{ domainsToDelete.split('\n').length }}</small>
+          </div>
+          <div class="card result-card" v-if="respDomains.length > 0">
+            <h5 class="card-header">Result</h5>
+            <div class="table-responsive text-nowrap">
+              <table class="table">
+                <thead>
+                  <tr class="text-nowrap">
+                    <th>#</th>
+                    <th>Domain</th>
+                    <th>Status Code</th>
+
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(domain, i) in respDomains" :key="i" :class="domain.code === 'No Content' ? 'bg-success' : 'bg-danger'">
+                    <th scope="row">{{ ++i }}</th>
+                    <td>{{ domain.name }}</td>
+                    <td>{{ domain.code}}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-outline-secondary"
+            data-bs-dismiss="modal"
+          >
+            Close
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary"
+            @click="deleteDomains"
+            :disabled="!domainsToDelete"
+          >
+            Delete Domains
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -397,10 +482,15 @@ export default {
       toastText: '',
       domainsToAdd: '',
       ipToAdd: '',
+      domainsToDelete: '',
       respDomains: []
     }
   },
   methods: {
+    increment () {
+      this.$store.commit('increment')
+      console.log(this.$store.state.count)
+    },
     showToast (type, title, time, text) {
       this.toastClass = type ? 'bg-' + type : ''
       this.toastTitle = title
@@ -476,6 +566,8 @@ export default {
       }
     },
     async addDomains () {
+      this.domainsToAdd = this.domainsToAdd.replaceAll('http://', '')
+
       const domains = [...new Set(this.domainsToAdd.split('\n'))].filter(
         (n) => n
       )
@@ -503,9 +595,40 @@ export default {
         console.log(error)
         this.showToast('danger', 'Error', 'now', error.response.data.msg)
       }
+    },
+    async deleteDomains () {
+      this.domainsToDelete = this.domainsToDelete.replaceAll('http://', '')
+
+      const domains = [...new Set(this.domainsToDelete.split('\n'))].filter(
+        (n) => n
+      )
+
+      console.log({ domains })
+
+      const config = {
+        method: 'delete',
+        url: '/api/v1/do_accounts/' + this.accountId + '/domains',
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Content-Type': 'application/json'
+        },
+        data: {
+          domains
+        }
+      }
+
+      try {
+        const resp = await axios(config)
+        console.log(resp)
+        this.respDomains = resp.data.domains
+      } catch (error) {
+        console.log(error)
+        this.showToast('danger', 'Error', 'now', error.response.data.msg)
+      }
     }
   },
   mounted: function () {
+    this.increment()
     this.getAccount(this.accountId)
   },
   components: {
