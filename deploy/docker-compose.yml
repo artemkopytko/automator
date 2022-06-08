@@ -8,7 +8,9 @@ services:
       #- "--log.level=DEBUG"
       - "--api.insecure=true"
       - "--providers.docker=true"
-      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.exposedByDefault=false"
+      - "--providers.docker.watch=true"
+      - "--providers.docker.network=traefik"
       - "--entrypoints.web.address=:80"
       - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
       - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
@@ -25,6 +27,8 @@ services:
     volumes:
       - "./letsencrypt:/letsencrypt"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      - traefik
 
   frontend:
     container_name: ${APP_NAME}-frontend
@@ -36,6 +40,9 @@ services:
       - "traefik.http.routers.frontend.rule=Host(`${APP_HOST}`)"
       - "traefik.http.routers.frontend.tls=true"
       - "traefik.http.routers.frontend.tls.certresolver=myresolver"
+    networks:
+      - traefik
+      - internal
 
   backend:
     container_name: ${APP_NAME}-backend
@@ -65,20 +72,22 @@ services:
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASS: ${MYSQL_PASS}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+    labels:
+      - "traefik.enable=false"
     ports:
-      - "3308:3306"
+      - 3307:3306
     volumes:
-      # - mysql:/var/lib/mysql
+      - mysql:/var/lib/mysql
     networks:
       - internal
 
-# volumes:
-#     mysql: null
+volumes:
+  mysql:
+
 
 networks:
   traefik:
     external: true
   internal:
-    external: false
+    driver: bridge
